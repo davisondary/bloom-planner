@@ -1,0 +1,91 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<!-- Главная белая карточка расписания -->
+<div class="dash-box" style="max-width:900px; margin:0 auto; padding:30px;">
+
+    <h2 style="margin-bottom:20px;">Расписание по дням</h2>
+
+    <h3 style="margin-bottom:20px;">
+        Расписание на {{ current_date }}
+        {% if is_today %}
+            <span style="color:var(--text-light); font-size:14px;">(сегодня)</span>
+        {% endif %}
+    </h3>
+
+    <!-- Кнопки экспорта (используем существующие эндпоинты) -->
+    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px;">
+        <a href="{{ url_for('export_pdf') }}" class="btn">PDF сегодня</a>
+        <a href="{{ url_for('export_excel') }}" class="btn">Excel сегодня</a>
+    </div>
+
+    <!-- Навигация по дням -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin:20px 0;">
+
+        <a href="{{ url_for('schedule_day', date=prev_date) }}"
+           class="btn btn-secondary">
+            « Предыдущий день
+        </a>
+
+        <div style="font-size:16px; font-weight:500;">
+            {{ current_date }}
+            {% if is_today %}
+                <span style="color:var(--text-light);">(сегодня)</span>
+            {% endif %}
+        </div>
+
+        <a href="{{ url_for('schedule_day', date=next_date) }}"
+           class="btn btn-secondary">
+            Следующий день »
+        </a>
+
+    </div>
+
+    <!-- Кнопка "Перейти к сегодня" -->
+    <div style="text-align:center; margin-bottom:20px;">
+        {% if not is_today %}
+            <a class="btn" href="{{ url_for('schedule_day') }}">Перейти к сегодня</a>
+        {% endif %}
+    </div>
+
+    <!-- Таблица расписания -->
+    {% if schedule %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Начало</th>
+                    <th>Конец</th>
+                    <th>Задача</th>
+                    <th>Приоритет</th>
+                    <th>Сложность</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for s in schedule %}
+                <tr>
+                    <td>{{ s.start }}</td>
+                    <td>{{ s.end }}</td>
+                    <td>{{ s.title }}</td>
+                    <td>
+                        {% if s.priority == 1 %}
+                            Высокий
+                        {% elif s.priority == 2 %}
+                            Средний
+                        {% else %}
+                            Низкий
+                        {% endif %}
+                    </td>
+                    <td>{{ s.difficulty }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p style="margin-top:20px; color:var(--text-light); font-size:15px;">
+            На выбранный день задач нет.
+        </p>
+    {% endif %}
+
+</div>
+
+{% endblock %}

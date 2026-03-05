@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="dash-box" style="max-width:720px; margin:0 auto; padding:28px;">
+
+    <h2 style="margin-bottom:8px;">⚙️ Настройки режима дня</h2>
+    <p class="small-hint">
+        Эти параметры используются ИИ-ассистентом для построения расписания и оценки нагрузки.
+    </p>
+
+    <form method="post" style="margin-top:20px;">
+
+        <!-- ВРЕМЯ СНА / АКТИВНОСТИ -->
+        <fieldset style="border:none; padding:0; margin-bottom:24px;">
+            <legend style="font-weight:500; margin-bottom:12px;">Время сна</legend>
+
+            <div class="compact-form-grid">
+                <label>
+                    Сон (от):
+                    <input type="time" name="sleep_start" value="{{ sleep_start }}">
+                </label>
+
+                <label>
+                    Сон (до):
+                    <input type="time" name="sleep_end" value="{{ sleep_end }}">
+                </label>
+            </div>
+
+            <p class="small-hint" style="text-align:left; margin-top:10px;">
+                Время сна определяет границы активного дня. ИИ не будет планировать задачи внутри этого промежутка.
+            </p>
+        </fieldset>
+
+        <hr class="inner-divider">
+
+        <!-- ПЕРЕРЫВЫ -->
+        <fieldset style="border:none; padding:0; margin-bottom:24px;">
+            <legend style="font-weight:500; margin-bottom:8px;">Периоды отдыха</legend>
+
+            <p class="small-hint" style="text-align:left; margin-bottom:10px;">
+                Укажите регулярные перерывы (обед, прогулка и т.п.), чтобы ИИ не ставил туда задачи.
+            </p>
+
+            <div id="rest-periods" style="display:flex; flex-direction:column; gap:8px;">
+
+                {# уже сохранённые перерывы #}
+                {% for rp in rest_periods %}
+                <div class="rest-row" style="display:flex; align-items:center; gap:8px;">
+                    <input type="time" name="rest_start" value="{{ rp.start }}">
+                    <span style="font-size:13px; color:var(--text-light);">—</span>
+                    <input type="time" name="rest_end" value="{{ rp.end }}">
+                </div>
+                {% endfor %}
+
+                {# свободные строки для новых перерывов (до 3 всего) #}
+                {% for i in range(3 - rest_periods|length) %}
+                <div class="rest-row" style="display:flex; align-items:center; gap:8px;">
+                    <input type="time" name="rest_start">
+                    <span style="font-size:13px; color:var(--text-light);">—</span>
+                    <input type="time" name="rest_end">
+                </div>
+                {% endfor %}
+            </div>
+        </fieldset>
+
+        <button type="submit" class="btn" style="width:100%; margin-top:8px;">
+            💾 Сохранить настройки
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

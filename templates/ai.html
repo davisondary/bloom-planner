@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="dash-box" style="max-width:900px; margin:0 auto; padding:30px;">
+
+    <h2 style="margin-bottom:20px;">🤖 ИИ-ассистент продуктивности</h2>
+
+    <!-- Блок рекомендаций -->
+    <h3 style="margin-bottom:12px;">Рекомендации</h3>
+
+    {% if insights %}
+        <ul style="margin-left:16px; margin-bottom:20px; line-height:1.6;">
+            {% for item in insights %}
+                <li style="
+                    margin-bottom:6px;
+                    padding:6px 10px;
+                    border-radius:8px;
+                    background:rgba(255,255,255,0.85);
+                    border-left:4px solid
+                        {% if item.type == 'warning' %}#e53935
+                        {% elif item.type == 'ok' %}#43a047
+                        {% elif item.type == 'tip' %}#fb8c00
+                        {% else %}#80cbc4
+                        {% endif %};
+                ">
+                    {{ item.text }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p style="color:var(--text-light);">Рекомендаций нет.</p>
+    {% endif %}
+
+    <hr class="inner-divider">
+
+    <!-- Анализ расписания -->
+    <h3 style="margin-bottom:16px;">📋 Расписание (анализ ИИ на сегодня)</h3>
+
+    {% if schedule %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Начало</th>
+                    <th>Конец</th>
+                    <th>Задача</th>
+                    <th>Приоритет</th>
+                    <th>Сложность</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in schedule %}
+                <tr>
+                    <td>{{ s.start }}</td>
+                    <td>{{ s.end }}</td>
+                    <td>{{ s.title }}</td>
+                    <td>
+                        {% if s.priority == 1 %}
+                            <span style="color:#e53935;">Высокий</span>
+                        {% elif s.priority == 2 %}
+                            <span style="color:#fb8c00;">Средний</span>
+                        {% else %}
+                            <span style="color:#43a047;">Низкий</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ s.difficulty }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p style="margin-top:10px; color:var(--text-light);">
+            Сегодня нет запланированных задач.
+        </p>
+    {% endif %}
+
+</div>
+
+{% endblock %}

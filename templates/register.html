@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bloom • Регистрация</title>
+
+  <style>
+    /* те же цвета/стиль что и login, чтобы было едино */
+    :root{
+      --bg1:#fff7fb;
+      --bg2:#f3fbf8;
+      --card:#ffffffcc;
+      --card-2:#ffffffa8;
+      --text:#3b2a2a;
+      --muted:#8b6f73;
+      --stroke:#f2d7e4;
+
+      --pink:#ff86b7;
+      --mint:#c9f2e3;
+
+      --shadow: 0 18px 50px rgba(60, 30, 40, .10);
+      --shadow-soft: 0 10px 26px rgba(60, 30, 40, .08);
+      --radius: 22px;
+      --radius-sm: 16px;
+
+      --btn-grad: linear-gradient(90deg, #ff8dc0 0%, #ffc1d8 52%, #bfeee0 100%);
+      --btn-grad-hover: linear-gradient(90deg, #ff78b4 0%, #ffb2d0 52%, #a8e6d4 100%);
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans";
+      color:var(--text);
+      min-height:100vh;
+      background:
+        radial-gradient(1200px 700px at 18% 18%, rgba(255, 190, 221, .55), transparent 60%),
+        radial-gradient(900px 600px at 85% 28%, rgba(203, 242, 232, .60), transparent 62%),
+        radial-gradient(900px 800px at 60% 95%, rgba(241, 220, 235, .65), transparent 60%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      overflow-x:hidden;
+    }
+
+    .shape{
+      position:fixed; z-index:0;
+      opacity:.55;
+      border:1px solid rgba(255, 160, 205, .35);
+      background: linear-gradient(145deg, rgba(255, 210, 232, .75), rgba(220, 250, 241, .55));
+      box-shadow: 0 20px 70px rgba(60, 30, 40, .08);
+      border-radius: 22px;
+    }
+    .s1{ width:120px; height:120px; left:6%; top:16%; transform: rotate(10deg); }
+    .s2{ width:160px; height:90px; right:10%; top:12%; transform: rotate(-14deg); border-radius: 999px; }
+    .s3{ width:140px; height:140px; right:8%; bottom:10%; transform: rotate(8deg); opacity:.40;}
+    .s4{ width:110px; height:110px; left:12%; bottom:12%; transform: rotate(-8deg); opacity:.40;}
+
+    .wrap{
+      position:relative; z-index:1;
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 46px 18px 60px;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+    }
+
+    .card{
+      width:100%;
+      background: var(--card);
+      border: 1px solid rgba(242, 215, 228, .75);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      padding: 26px 26px 22px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom: 10px;
+    }
+    .logo{
+      width:46px; height:46px;
+      border-radius: 14px;
+      background: linear-gradient(145deg, rgba(255, 145, 190, .95), rgba(196, 246, 231, .95));
+      box-shadow: 0 10px 26px rgba(255, 140, 190, .18);
+      display:grid;
+      place-items:center;
+      border:1px solid rgba(255, 255, 255, .7);
+    }
+    .brand h1{
+      margin:0;
+      font-size: 22px;
+      letter-spacing: .2px;
+    }
+    .brand p{
+      margin: 2px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .title{
+      margin: 10px 0 0;
+      font-size: 22px;
+      font-weight: 800;
+    }
+    .subtitle{
+      margin: 6px 0 18px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .error{
+      padding: 12px 12px;
+      border-radius: 14px;
+      background: rgba(255, 120, 180, .12);
+      border: 1px solid rgba(255, 120, 180, .25);
+      color: #7a2b46;
+      margin-bottom: 14px;
+      font-size: 13px;
+    }
+
+    label{
+      display:block;
+      font-size: 12px;
+      color: var(--muted);
+      margin: 10px 0 6px;
+    }
+    input{
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(242, 215, 228, .95);
+      background: #fff;
+      outline: none;
+      font-size: 14px;
+      box-shadow: 0 6px 18px rgba(60, 30, 40, .06);
+    }
+    input:focus{
+      border-color: rgba(255, 140, 190, .65);
+      box-shadow: 0 0 0 4px rgba(255, 160, 205, .20), 0 10px 22px rgba(60, 30, 40, .06);
+    }
+
+    .hint{
+      margin-top: 8px;
+      font-size: 12px;
+      color: rgba(139, 111, 115, .92);
+      line-height: 1.35;
+    }
+
+    .btn{
+      width:100%;
+      margin-top: 14px;
+      padding: 12px 14px;
+      border: 0;
+      border-radius: 999px;
+      font-weight: 800;
+      color: #3b2a2a;
+      background: var(--btn-grad);
+      cursor:pointer;
+      box-shadow: 0 16px 34px rgba(255, 140, 190, .18);
+      transition: transform .08s ease, filter .15s ease, background .15s ease;
+    }
+    .btn:hover{ background: var(--btn-grad-hover); filter: saturate(1.05); }
+    .btn:active{ transform: translateY(1px); }
+
+    .link{
+      margin-top: 12px;
+      text-align:center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .link a{
+      color: #b24f77;
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(178, 79, 119, .35);
+      padding-bottom: 2px;
+    }
+    .link a:hover{ border-bottom-color: rgba(178, 79, 119, .65); }
+
+    .tiny{
+      margin-top: 14px;
+      text-align:center;
+      font-size: 12px;
+      color: rgba(139, 111, 115, .9);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="shape s1"></div>
+  <div class="shape s2"></div>
+  <div class="shape s3"></div>
+  <div class="shape s4"></div>
+
+  <main class="wrap">
+    <section class="card">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M12 21s7-4.35 7-10.2C19 7.14 16.76 5 14 5c-1.46 0-2.82.62-3.72 1.62C9.38 5.62 8.02 5 6.56 5 3.8 5 1.56 7.14 1.56 10.8 1.56 16.65 8.56 21 12 21Z"
+                  stroke="white" stroke-width="1.6"/>
+          </svg>
+        </div>
+        <div>
+          <h1>Bloom</h1>
+          <p>создание аккаунта</p>
+        </div>
+      </div>
+
+      <h2 class="title">Регистрация</h2>
+      <div class="subtitle">Создайте аккаунт, чтобы задачи были только вашими</div>
+
+      {% if error %}
+        <div class="error">{{ error }}</div>
+      {% endif %}
+
+      <form method="POST" action="{{ url_for('web_register') }}">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" autocomplete="email" required placeholder="name@mail.com" />
+
+        <label for="password">Пароль</label>
+        <input id="password" name="password" type="password" autocomplete="new-password" required placeholder="минимум 6 символов" />
+
+        <div class="hint">
+          Совет: придумай пароль от 6+ символов. Потом этим же логином ты сможешь войти и в телефоне (Flutter), и на ПК.
+        </div>
+
+        <button class="btn" type="submit">Создать аккаунт</button>
+      </form>
+
+      <div class="link">
+        Уже есть аккаунт? <a href="{{ url_for('web_login') }}">Войти</a>
+      </div>
+
+      <div class="tiny">Bloom • нежно, понятно, по плану 🌷</div>
+    </section>
+  </main>
+</body>
+</html>

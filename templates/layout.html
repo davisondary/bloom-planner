@@ -1,0 +1,41 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление задачами</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <header>
+        <div class="header-container">
+            <h2>Планер</h2>
+            <nav>
+                <a href="{{ url_for('index') }}" {% if request.endpoint == 'index' %}class="active"{% endif %}>Задачи</a>
+                <a href="{{ url_for('schedule_day') }}" {% if request.endpoint == 'schedule_day' %}class="active"{% endif %}>Расписание</a>
+                <a href="{{ url_for('ai_assistant_view') }}" {% if request.endpoint == 'ai_assistant_view' %}class="active"{% endif %}>ИИ-ассистент</a>
+                <a href="{{ url_for('stats_view') }}" {% if request.endpoint == 'stats_view' %}class="active"{% endif %}>Статистика</a>
+                <a href="{{ url_for('settings_view') }}" {% if request.endpoint == 'settings_view' %}class="active"{% endif %}>Настройки</a>
+                {% if session.get("user_id") %}
+                <a class="logout-btn" href="{{ url_for('web_logout') }}">Выход</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer>
+        <p>Продуктивного дня!</p>
+    </footer>
+</body>
+</html>

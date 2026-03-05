@@ -1,0 +1,514 @@
+{% extends "layout.html" %}
+{% block content %}
+
+
+
+<div class="dashboard-layout">
+
+    <!-- ЛЕВАЯ КОЛОНКА: КАЛЕНДАРЬ + ЗАМЕТКИ -->
+    <div class="dash-left-col">
+
+        <!-- Календарь -->
+        <div class="dash-box">
+            <h4>📅 Календарь</h4>
+            <div id="mini-calendar">
+                <div class="calendar-header">
+                    <button type="button" id="cal-prev" class="btn btn-secondary" style="height:28px;padding:0 10px;font-size:12px;">
+                        ‹
+                    </button>
+                    <span id="cal-month-label">Месяц Год</span>
+                    <button type="button" id="cal-next" class="btn btn-secondary" style="height:28px;padding:0 10px;font-size:12px;">
+                        ›
+                    </button>
+                </div>
+
+                <table class="calendar-table">
+                    <thead>
+                        <tr>
+                            <th>Пн</th>
+                            <th>Вт</th>
+                            <th>Ср</th>
+                            <th>Чт</th>
+                            <th>Пт</th>
+                            <th>Сб</th>
+                            <th>Вс</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cal-body">
+                        <!-- заполняется скриптом -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Заметки -->
+        <div class="dash-box">
+            <h4>📝 Заметки</h4>
+            <textarea id="day-notes"
+                      class="notes-textarea"
+                      placeholder="Ваши заметки на день...">{{ note_text or "" }}</textarea>
+            <p class="small-hint">Сохраняется автоматически</p>
+        </div>
+
+    </div>
+
+    <!-- ЦЕНТРАЛЬНАЯ КОЛОНКА: СОЗДАНИЕ + ТЕКУЩИЕ ЗАДАЧИ -->
+    <div class="dash-center-col">
+
+        <!-- СОЗДАНИЕ ЗАДАЧИ -->
+        <div class="dash-box">
+            <h3 style="text-align:center;margin-bottom:16px;">➕ Создание задачи</h3>
+
+            <div class="add-mode-tabs">
+                <button type="button" class="tab-btn active" data-mode="ai">🤖 ИИ-помощник</button>
+                <button type="button" class="tab-btn" data-mode="manual">✏️ Вручную</button>
+            </div>
+
+            <!-- Режим: ИИ-помощник -->
+            <div class="add-mode-panel" id="mode-ai">
+                <input type="text"
+                       id="ai-command"
+                       class="full-width-input"
+                       placeholder="Например: «английский средний 40 минут»"
+                       style="margin-bottom:12px;">
+
+                <button type="button" class="btn" id="ai-submit-btn" style="width:100%;">
+                    🌱 Создать задачу
+                </button>
+
+                <ul class="hint-list">
+                    <li>«курсовая высокий 80 минут 7 дней»</li>
+                    <li>«русский завтра средний 30 минут»</li>
+                    <li>«математика через 3 дня высокий 60 минут»</li>
+                </ul>
+            </div>
+
+            <!-- Режим: вручную -->
+            <div class="add-mode-panel hidden" id="mode-manual">
+
+                <!-- Обычная задача -->
+                <form method="post" action="{{ url_for('add_task') }}" style="margin-bottom:18px;">
+                    <div class="compact-form-grid">
+                        <label>
+                            Наименование задачи:
+                            <input type="text" name="title" required>
+                        </label>
+                        <label>
+                            Длительность (минуты):
+                            <input type="number" name="duration" min="1" placeholder="Авто">
+                        </label>
+                    </div>
+
+                    <div class="compact-form-grid" style="margin-top:8px;">
+                        <label>
+                            Приоритет:
+                            <select name="priority">
+                                <option value="1">Высокий</option>
+                                <option value="2" selected>Средний</option>
+                                <option value="3">Низкий</option>
+                            </select>
+                        </label>
+                        <label>
+                            Дедлайн:
+                            <input type="date" name="deadline">
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn" style="width:100%;margin-top:10px;">
+                        ➕ Добавить задачу
+                    </button>
+                </form>
+
+                <hr class="inner-divider">
+
+                <!-- Задача на несколько дней -->
+                <form method="post" action="{{ url_for('add_big_task') }}">
+                    <h4 style="font-size:14px;margin-bottom:8px;">🔁 Серия задач на несколько дней</h4>
+
+                    <div class="compact-form-grid">
+                        <label>
+                            Наименование серии:
+                            <input type="text" name="big_title" required>
+                        </label>
+                        <label>
+                            Минут в день:
+                            <input type="number" name="daily_minutes" value="60">
+                        </label>
+                    </div>
+
+                    <div class="compact-form-grid" style="margin-top:8px%;">
+                        <label>
+                            Количество дней:
+                            <input type="number" name="days_count" value="7">
+                        </label>
+                        <label>
+                            Дата начала:
+                            <input type="date" name="start_date">
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn" style="width:100%;margin-top:10px;">
+                        🌿 Создать серию
+                    </button>
+                </form>
+
+            </div>
+        </div>
+
+        <!-- ТЕКУЩИЕ ЗАДАЧИ -->
+        <div class="dash-box">
+            <h3 style="margin:0 0 16px;font-size:18px;">
+                📋 Текущие задачи ({{ tasks|length if tasks else 0 }})
+            </h3>
+
+            {% if tasks %}
+            <div style="overflow-x:auto;font-size:14px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Задача</th>
+                            <th>Длительность</th>
+                            <th>Приоритет</th>
+                            <th>Статус</th>
+                            <th style="width:160px;">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for t in tasks %}
+                        <tr>
+                            <td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;">
+                                {{ t.title }}
+                            </td>
+                            <td>{{ t.duration }} мин</td>
+                            <td>
+                                {% if t.priority == 1 %}
+                                    <span style="color:#e53935;">Высокий</span>
+                                {% elif t.priority == 2 %}
+                                    <span style="color:#fb8c00;">Средний</span>
+                                {% else %}
+                                    <span style="color:#43a047;">Низкий</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if t.done %}
+                                    <span style="color:#43a047;">Выполнено</span>
+                                {% else %}
+                                    <span style="color:var(--text-light);">Не выполнено</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="compact-actions">
+                                    {% if not t.done %}
+                                    <form method="post"
+                                          action="{{ url_for('mark_done', id=t.id) }}"
+                                          style="display:inline;">
+                                        <button type="submit" class="btn" style="padding:4px 10px;">
+                                            Отметить
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                    <a href="{{ url_for('edit_task', id=t.id) }}"
+                                       class="btn btn-secondary"
+                                       style="padding:4px 10px;">
+                                        Изменить
+                                    </a>
+                                    <form method="post"
+                                          action="{{ url_for('delete_task', id=t.id) }}"
+                                          style="display:inline;">
+                                        <button type="submit"
+                                                class="btn btn-delete"
+                                                style="padding:4px 10px;"
+                                                onclick="return confirm('Удалить задачу?');">
+                                            Удалить
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div style="text-align:center;padding:18px 10px;color:var(--text-light);">
+                <p style="margin-bottom:10px;">Задачи ещё не созданы.</p>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <!-- ПРАВАЯ КОЛОНКА: ПРОГРЕСС + ТАЙМЕР -->
+    <div class="dash-right-col">
+
+        <!-- Прогресс дня -->
+        <div class="dash-box">
+            <h4>📊 Прогресс дня</h4>
+
+            <div style="text-align:center;margin:12px 0;">
+                <div style="position:relative;width:90px;height:90px;margin:0 auto;">
+                    <svg width="90" height="90" viewBox="0 0 80 80">
+                        <circle cx="40" cy="40" r="36"
+                                fill="none"
+                                stroke="rgba(165,214,167,0.2)"
+                                stroke-width="8"/>
+                        <circle cx="40" cy="40" r="36"
+                                fill="none"
+                                stroke="var(--lotus-pink)"
+                                stroke-width="8"
+                                stroke-linecap="round"
+                                stroke-dasharray="226.194 226.194"
+                                stroke-dashoffset="{{ 226.194 * (1 - (progress_percent|default(0))/100) }}"
+                                transform="rotate(-90 40 40)"/>
+                    </svg>
+                    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);">
+                        <div style="font-size:18px;font-weight:600;">
+                            {{ progress_percent|default(0) }}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="progress-text">
+                Сегодня выполнено задач: {{ progress_done|default(0) }}
+            </p>
+        </div>
+
+        <!-- Таймер -->
+        <div class="dash-box">
+            <h4>⏱️ Таймер отдыха</h4>
+
+            <!-- АУДИО ДЛЯ ТАЙМЕРА -->
+            <audio id="timer-music"
+                   src="{{ url_for('static', filename='sounds/timer_music.mp3') }}"
+                   loop></audio>
+
+            <div style="text-align:center;margin:10px 0;">
+                <input type="number" id="timer-minutes" value="25" min="1" max="180"
+                       style="width:70px;text-align:center;padding:6px;">
+            </div>
+
+            <div class="timer-display" id="timer-display">25:00</div>
+
+            <div class="timer-buttons">
+                <button class="btn" id="timer-start">Старт</button>
+                <button class="btn btn-secondary" id="timer-pause">Пауза</button>
+                <button class="btn btn-delete" id="timer-reset">Сброс</button>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+    // ---------------- КАЛЕНДАРЬ ----------------
+    const monthNames = [
+        "Январь","Февраль","Март","Апрель","Май","Июнь",
+        "Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"
+    ];
+    let calDate = new Date();
+
+    function renderCalendar(date) {
+        const year = date.getFullYear();
+        const month = date.getMonth();
+
+        const label = document.getElementById("cal-month-label");
+        const tbody = document.getElementById("cal-body");
+        if (!label || !tbody) return;
+
+        label.textContent = monthNames[month] + " " + year;
+
+        const firstDay = new Date(year, month, 1);
+        let startDay = firstDay.getDay();
+        if (startDay === 0) startDay = 7;
+
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        tbody.innerHTML = "";
+        let row = document.createElement("tr");
+
+        for (let i = 1; i < startDay; i++) {
+            row.appendChild(document.createElement("td"));
+        }
+
+        const today = new Date();
+        const isCurrentMonth = (today.getFullYear() === year && today.getMonth() === month);
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const cell = document.createElement("td");
+            cell.textContent = day;
+
+            if (isCurrentMonth && today.getDate() === day) {
+                cell.classList.add("today");
+            }
+
+            row.appendChild(cell);
+
+            if ((startDay + day - 1) % 7 === 0) {
+                tbody.appendChild(row);
+                row = document.createElement("tr");
+            }
+        }
+
+        if (row.children.length > 0) {
+            tbody.appendChild(row);
+        }
+    }
+
+    document.getElementById("cal-prev")?.addEventListener("click", () => {
+        calDate.setMonth(calDate.getMonth() - 1);
+        renderCalendar(calDate);
+    });
+
+    document.getElementById("cal-next")?.addEventListener("click", () => {
+        calDate.setMonth(calDate.getMonth() + 1);
+        renderCalendar(calDate);
+    });
+
+    renderCalendar(calDate);
+
+    // ---------------- ПЕРЕКЛЮЧЕНИЕ РЕЖИМОВ ДОБАВЛЕНИЯ ----------------
+    const modeButtons = document.querySelectorAll(".add-mode-tabs .tab-btn");
+    const modePanels  = {
+        ai: document.getElementById("mode-ai"),
+        manual: document.getElementById("mode-manual")
+    };
+
+    modeButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            modeButtons.forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+
+            const mode = btn.dataset.mode;
+            Object.keys(modePanels).forEach(m => {
+                if (modePanels[m]) {
+                    modePanels[m].classList.toggle("hidden", m !== mode);
+                }
+            });
+        });
+    });
+
+    // ---------------- АВТОСОХРАНЕНИЕ ЗАМЕТОК ----------------
+// ---------------- АВТОСОХРАНЕНИЕ ЗАМЕТОК ----------------
+    const notesEl = document.getElementById("day-notes");
+    if (notesEl) {
+        let notesTimer;
+        notesEl.addEventListener("input", () => {
+            clearTimeout(notesTimer);
+            notesTimer = setTimeout(() => {
+                fetch("{{ url_for('save_notes') }}", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({
+                        date: "{{ today_date }}",   // 👈 передаём сегодняшнюю дату с бэкенда
+                        text: notesEl.value
+                    })
+                });
+            }, 800);
+        });
+    }
+
+
+    // ---------------- ИИ-ПОМОЩНИК ----------------
+    const aiInput = document.getElementById("ai-command");
+    const aiBtn   = document.getElementById("ai-submit-btn");
+
+    if (aiBtn && aiInput) {
+        aiBtn.addEventListener("click", () => {
+            const command = aiInput.value.trim();
+            if (!command) return;
+
+            fetch("{{ url_for('add_ai_command') }}", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: "command=" + encodeURIComponent(command)
+            }).then(() => {
+                location.reload();
+            });
+        });
+
+        aiInput.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                aiBtn.click();
+            }
+        });
+    }
+
+    // ---------------- ТАЙМЕР + МУЗЫКА ----------------
+    let timerInterval = null;
+    let timeLeft = 25 * 60;
+    let timerRunning = false;
+
+    function getTimerMusic() {
+        return document.getElementById("timer-music");
+    }
+
+    function updateTimerDisplay() {
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+        const el = document.getElementById("timer-display");
+        if (el) {
+            el.textContent = String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+        }
+    }
+
+    function startTimer() {
+        if (timerRunning) return;
+        timerRunning = true;
+
+        const music = getTimerMusic();
+        if (music) {
+            try {
+                music.currentTime = 0;
+                music.play();
+            } catch (e) {
+                console.log("Не удалось запустить музыку:", e);
+            }
+        }
+
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            if (timeLeft <= 0) {
+                timeLeft = 0;
+                clearInterval(timerInterval);
+                timerRunning = false;
+
+                if (music) music.pause();
+
+                alert("Время таймера истекло");
+            }
+            updateTimerDisplay();
+        }, 1000);
+    }
+
+    function pauseTimer() {
+        clearInterval(timerInterval);
+        timerRunning = false;
+
+        const music = getTimerMusic();
+        if (music) music.pause();
+    }
+
+    function resetTimer() {
+        pauseTimer();
+        const input = document.getElementById("timer-minutes");
+        const minutes = parseInt(input?.value || "25", 10) || 25;
+        timeLeft = minutes * 60;
+        updateTimerDisplay();
+
+        const music = getTimerMusic();
+        if (music) music.pause();
+    }
+
+    document.getElementById("timer-start")?.addEventListener("click", startTimer);
+    document.getElementById("timer-pause")?.addEventListener("click", pauseTimer);
+    document.getElementById("timer-reset")?.addEventListener("click", resetTimer);
+    document.getElementById("timer-minutes")?.addEventListener("change", resetTimer);
+
+    resetTimer();
+</script>
+
+{% endblock %}

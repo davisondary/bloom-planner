@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h3>Редактирование задачи</h3>
+
+<form method="post">
+
+    <label>
+        Название:
+        <input type="text" name="title" value="{{ task.title }}" required>
+    </label>
+
+    <label>
+        Длительность (мин):
+        <input type="number" name="duration" value="{{ task.duration }}" required>
+    </label>
+
+    <label>
+        Приоритет:
+        <select name="priority">
+            <option value="1" {% if task.priority==1 %}selected{% endif %}>Высокий</option>
+            <option value="2" {% if task.priority==2 %}selected{% endif %}>Средний</option>
+            <option value="3" {% if task.priority==3 %}selected{% endif %}>Низкий</option>
+        </select>
+    </label>
+
+    <label>
+        Дедлайн:
+        <input type="date" name="deadline" value="{{ task.deadline }}">
+    </label>
+
+    <button type="submit" class="btn">Сохранить</button>
+    <a href="{{ url_for('index') }}" class="btn">Назад</a>
+
+</form>
+
+{% endblock %}

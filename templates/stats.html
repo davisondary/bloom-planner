@@ -1,0 +1,76 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="dash-box" style="max-width:1000px; margin:0 auto; padding:28px;">
+
+    <h2 style="margin-bottom:8px;">📈 Статистика</h2>
+    <p class="small-hint">Небольшой срез по вашим задачам и времени.</p>
+
+    {# мини-карточки с основными цифрами #}
+    <div style="
+        display:grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap:12px;
+        margin:20px 0 10px;
+    ">
+        <div class="mini-stat">
+            <div class="value">{{ total_tasks }}</div>
+            <div class="label">всего задач</div>
+        </div>
+
+        <div class="mini-stat">
+            <div class="value">{{ done_count }}</div>
+            <div class="label">выполнено</div>
+        </div>
+
+        <div class="mini-stat">
+            <div class="value">
+                {% if total_tasks %}
+                    {{ (done_count * 100 // total_tasks) }}%
+                {% else %}
+                    0%
+                {% endif %}
+            </div>
+            <div class="label">процент выполнения</div>
+        </div>
+    </div>
+
+    <p style="font-size:14px; color:var(--text-light); margin-bottom:4px;">
+        Суммарная длительность всех задач:
+        <b>{{ total_duration }}</b> мин
+        (≈ {{ (total_duration // 60) }} ч {{ (total_duration % 60) }} мин)
+    </p>
+
+    <hr class="inner-divider">
+
+    <h3 style="margin-bottom:16px;">Графики</h3>
+
+    <div style="
+        display:grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap:16px;
+    ">
+        <div class="block-card">
+            <h4 style="margin-bottom:10px;">По приоритетам</h4>
+            <p class="small-hint" style="margin-bottom:8px;">
+                Диаграмма показывает, на какие приоритеты уходит больше всего времени.
+            </p>
+            <img src="{{ url_for('chart_priority') }}"
+                 alt="Диаграмма по приоритетам"
+                 style="max-width:100%; height:auto; display:block; margin:0 auto;">
+        </div>
+
+        <div class="block-card">
+            <h4 style="margin-bottom:10px;">Накопленная длительность</h4>
+            <p class="small-hint" style="margin-bottom:8px;">
+                Как накапливается суммарное время задач по мере их добавления.
+            </p>
+            <img src="{{ url_for('chart_timeline') }}"
+                 alt="График по времени"
+                 style="max-width:100%; height:auto; display:block; margin:0 auto;">
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
