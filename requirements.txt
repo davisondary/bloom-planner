@@ -1,7 +1,8 @@
 flask
 flask-cors
-gunicorn
+PyJWT==2.8.0
 pandas
 openpyxl
 matplotlib
 reportlab
+gunicorn
